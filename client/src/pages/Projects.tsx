@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import type { Project } from '../types'
 import {
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { dummyConversations, dummyProjects, dummyVersion } from '../assets/assets'
 import Sidebar from '../components/Sidebar'
+import ProjectPreview, { type ProjectPreviewRef } from '../components/ProjectPreview'
 
 const Projects = () => {
   const { projectId } = useParams()
@@ -29,6 +30,8 @@ const Projects = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  const previewRef = useRef<ProjectPreviewRef>(null)
 
   const fetchProject = async () => {
     const found = dummyProjects.find(p => p.id === projectId)
@@ -51,9 +54,7 @@ const Projects = () => {
     setTimeout(() => setIsSaving(false), 1000)
   }
 
-  const downloadCode = () => {
-    // implement download
-  }
+  const downloadCode = () => {}
 
   const togglePublish = async () => {
     if (!project) return
@@ -84,9 +85,7 @@ const Projects = () => {
 
   return (
     <div className="flex flex-col h-screen w-full bg-gray-900 text-white">
-      {/* Header */}
       <div className="flex max-sm:flex-col sm:items-center gap-4 px-4 py-2">
-        {/* Left */}
         <div className="flex items-center gap-2 sm:min-w-[360px]">
           <img
             src="/favicon.svg"
@@ -118,7 +117,6 @@ const Projects = () => {
           </div>
         </div>
 
-        {/* Middle */}
         <div className="hidden sm:flex gap-2 bg-gray-950 p-1.5 rounded-md">
           <SmartphoneIcon
             onClick={() => setDevice('phone')}
@@ -140,7 +138,6 @@ const Projects = () => {
           />
         </div>
 
-        {/* Right */}
         <div className="flex items-center justify-end gap-3 flex-1 text-xs sm:text-sm">
           <button
             onClick={saveProject}
@@ -182,7 +179,6 @@ const Projects = () => {
         </div>
       </div>
 
-      {/* Body */}
       <div className="flex-1 flex overflow-hidden">
         <Sidebar
           isMenuOpen={isMenuOpen}
@@ -192,7 +188,14 @@ const Projects = () => {
           setIsGenerating={setIsGenerating}
         />
 
-        <div className="flex-1 p-2 pl-0">Project Preview</div>
+        <div className="flex-1 p-2 pl-0">
+          <ProjectPreview
+            ref={previewRef}
+            project={project}
+            isGenerating={isGenerating}
+            device={device}
+          />
+        </div>
       </div>
     </div>
   )
