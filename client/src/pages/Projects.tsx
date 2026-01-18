@@ -33,10 +33,10 @@ const Projects = () => {
 
   const previewRef = useRef<ProjectPreviewRef>(null)
 
-  const fetchProject = async () => {
+  useEffect(() => {
     const found = dummyProjects.find(p => p.id === projectId)
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (found) {
         setProject({
           ...found,
@@ -47,23 +47,38 @@ const Projects = () => {
       }
       setLoading(false)
     }, 2000)
-  }
+
+    return () => clearTimeout(timer)
+  }, [projectId])
 
   const saveProject = async () => {
     setIsSaving(true)
     setTimeout(() => setIsSaving(false), 1000)
   }
 
-  const downloadCode = () => {}
+  const downloadCode = () => {
+    const code =
+      previewRef.current?.getCode() ?? project?.current_code
 
-  const togglePublish = async () => {
+    if (!code || isGenerating) return
+
+    const blob = new Blob([code], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'index.html'
+    document.body.appendChild(a)
+    a.click()
+
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const togglePublish = () => {
     if (!project) return
     setProject({ ...project, isPublished: !project.isPublished })
   }
-
-  useEffect(() => {
-    fetchProject()
-  }, [projectId])
 
   if (loading) {
     return (
@@ -85,6 +100,7 @@ const Projects = () => {
 
   return (
     <div className="flex flex-col h-screen w-full bg-gray-900 text-white">
+      {/* Header */}
       <div className="flex max-sm:flex-col sm:items-center gap-4 px-4 py-2">
         <div className="flex items-center gap-2 sm:min-w-[360px]">
           <img
@@ -173,12 +189,17 @@ const Projects = () => {
             onClick={togglePublish}
             className="bg-linear-to-br from-indigo-700 to-indigo-600 hover:from-indigo-600 hover:to-indigo-500 text-white px-3.5 py-1 flex items-center gap-2 rounded"
           >
-            {project.isPublished ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+            {project.isPublished ? (
+              <EyeOffIcon size={16} />
+            ) : (
+              <EyeIcon size={16} />
+            )}
             {project.isPublished ? 'Unpublish' : 'Publish'}
           </button>
         </div>
       </div>
 
+      {/* Body */}
       <div className="flex-1 flex overflow-hidden">
         <Sidebar
           isMenuOpen={isMenuOpen}

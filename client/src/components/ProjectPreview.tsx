@@ -35,7 +35,26 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
     }
 
     useImperativeHandle(ref, () => ({
-      getCode: () => project.current_code,
+      getCode: () => {
+        const doc = iframeRef.current?.contentDocument
+        if (!doc) return undefined
+
+        doc
+          .querySelectorAll('.ai-selected-element, [data-ai-selected]')
+          .forEach((el) => {
+            el.classList.remove('ai-selected-element')
+            el.removeAttribute('data-ai-selected')
+            ;(el as HTMLElement).style.outline = ''
+          })
+
+        const previewStyle = doc.getElementById('ai-preview-style')
+        if (previewStyle) previewStyle.remove()
+
+        const previewScript = doc.getElementById('ai-preview-script')
+        if (previewScript) previewScript.remove()
+
+        return doc.documentElement.outerHTML
+      },
     }))
 
     useEffect(() => {

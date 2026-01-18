@@ -21,7 +21,7 @@ interface EditorPanelProps {
 }
 
 const EditorPanel = ({ selectedElement, onUpdate, onClose }: EditorPanelProps) => {
-  const [values, setValues] = useState<SelectedElement | null>(selectedElement);
+  const [values, setValues] = useState<SelectedElement | null>(null);
 
   useEffect(() => {
     setValues(selectedElement);
@@ -30,20 +30,20 @@ const EditorPanel = ({ selectedElement, onUpdate, onClose }: EditorPanelProps) =
   if (!values) return null;
 
   const handleChange = (field: 'text' | 'className', value: string) => {
-    const newValues = { ...values, [field]: value };
+    const newValues: SelectedElement = { ...values, [field]: value };
     setValues(newValues);
     onUpdate({ [field]: value });
   };
 
-  const handleStyleChange = (styleName: string, value: string) => {
+  const handleStyleChange = (styleName: keyof SelectedElement['styles'], value: string) => {
     const newStyles = { ...values.styles, [styleName]: value };
-    const newValues = { ...values, styles: newStyles };
+    const newValues: SelectedElement = { ...values, styles: newStyles };
     setValues(newValues);
     onUpdate({ styles: { [styleName]: value } });
   };
 
   return (
-    <div className="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50 animate-in fade-in slide-in-from-right-5">
+    <div className="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold text-gray-800">Edit Element</h3>
         <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full">
@@ -57,7 +57,7 @@ const EditorPanel = ({ selectedElement, onUpdate, onClose }: EditorPanelProps) =
             Text Content
           </label>
           <textarea
-            value={values.text || ''}
+            value={values.text ?? ''}
             onChange={(e) => handleChange('text', e.target.value)}
             className="w-full text-sm p-2 border border-gray-400 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none min-h-20"
           />
@@ -69,7 +69,7 @@ const EditorPanel = ({ selectedElement, onUpdate, onClose }: EditorPanelProps) =
           </label>
           <input
             type="text"
-            value={values.className || ''}
+            value={values.className ?? ''}
             onChange={(e) => handleChange('className', e.target.value)}
             className="w-full text-sm p-2 border rounded-md border-gray-400 focus:ring-2 focus:ring-indigo-500 outline-none"
           />
@@ -82,7 +82,7 @@ const EditorPanel = ({ selectedElement, onUpdate, onClose }: EditorPanelProps) =
             </label>
             <input
               type="text"
-              value={values.styles.padding || ''}
+              value={values.styles.padding ?? ''}
               onChange={(e) => handleStyleChange('padding', e.target.value)}
               className="w-full text-sm p-2 rounded-md border border-gray-400 focus:ring-2 focus:ring-indigo-500 outline-none"
             />
@@ -94,7 +94,7 @@ const EditorPanel = ({ selectedElement, onUpdate, onClose }: EditorPanelProps) =
             </label>
             <input
               type="text"
-              value={values.styles.margin || ''}
+              value={values.styles.margin ?? ''}
               onChange={(e) => handleStyleChange('margin', e.target.value)}
               className="w-full text-sm p-2 rounded-md border border-gray-400 focus:ring-2 focus:ring-indigo-500 outline-none"
             />
@@ -107,7 +107,7 @@ const EditorPanel = ({ selectedElement, onUpdate, onClose }: EditorPanelProps) =
           </label>
           <input
             type="text"
-            value={values.styles.fontSize || ''}
+            value={values.styles.fontSize ?? ''}
             onChange={(e) => handleStyleChange('fontSize', e.target.value)}
             className="w-full text-sm p-2 rounded-md border border-gray-400 focus:ring-2 focus:ring-indigo-500 outline-none"
           />
@@ -122,10 +122,9 @@ const EditorPanel = ({ selectedElement, onUpdate, onClose }: EditorPanelProps) =
               <input
                 type="color"
                 value={
-                  values.styles.backgroundColor === 'rgba(0,0,0,0)' ||
-                  !values.styles.backgroundColor
-                    ? '#ffffff'
-                    : values.styles.backgroundColor
+                  values.styles.backgroundColor && values.styles.backgroundColor !== 'rgba(0,0,0,0)'
+                    ? values.styles.backgroundColor
+                    : '#ffffff'
                 }
                 onChange={(e) =>
                   handleStyleChange('backgroundColor', e.target.value)
@@ -133,7 +132,7 @@ const EditorPanel = ({ selectedElement, onUpdate, onClose }: EditorPanelProps) =
                 className="w-6 h-6 cursor-pointer"
               />
               <span className="text-xs text-gray-600 truncate">
-                {values.styles.backgroundColor}
+                {values.styles.backgroundColor ?? ''}
               </span>
             </div>
           </div>
@@ -145,13 +144,13 @@ const EditorPanel = ({ selectedElement, onUpdate, onClose }: EditorPanelProps) =
             <div className="flex items-center gap-2 border border-gray-400 rounded-md p-1">
               <input
                 type="color"
-                value={values.styles.color || '#000000'}
+                value={values.styles.color ?? '#000000'}
                 onChange={(e) => handleStyleChange('color', e.target.value)}
                 className="w-6 h-6 cursor-pointer"
               />
             </div>
             <span className="text-xs text-gray-600 truncate">
-              {values.styles.color}
+              {values.styles.color ?? ''}
             </span>
           </div>
         </div>
