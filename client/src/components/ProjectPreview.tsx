@@ -16,9 +16,11 @@ interface ProjectPreviewProps {
   showEditorPanel?: boolean
 }
 
+
 export interface ProjectPreviewRef {
   getCode: () => string | undefined
 }
+
 
 const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
   (
